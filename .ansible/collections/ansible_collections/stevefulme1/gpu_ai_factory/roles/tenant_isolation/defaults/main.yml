@@ -1,5 +1,0 @@
----
-tenant_isolation_validate_certs: true
-tenant_isolation_qos_level: high
-tenant_isolation_max_gpus: 8
-tenant_isolation_max_jobs: 10
