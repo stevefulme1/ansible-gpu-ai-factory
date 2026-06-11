@@ -1,0 +1,42 @@
+---
+# DISA STIG hardening profile: high, medium, or low
+stig_profile: high
+
+# Whether to apply remediation or just audit
+remediate: true
+
+# Run in audit-only mode (report findings without changes)
+audit_only: false
+
+# Services to disable
+stig_disabled_services:
+  - bluetooth
+  - avahi-daemon
+  - cups
+  - rpcbind
+
+# SSH hardening settings
+stig_ssh_permit_root_login: "no"
+stig_ssh_max_auth_tries: 3
+stig_ssh_client_alive_interval: 300
+stig_ssh_client_alive_count_max: 0
+stig_ssh_protocol: 2
+
+# Auditd settings
+stig_auditd_max_log_file: 8
+stig_auditd_space_left_action: email
+stig_auditd_action_mail_acct: root
+
+# Kernel parameters
+stig_kernel_params:
+  net.ipv4.conf.all.accept_redirects: 0
+  net.ipv4.conf.default.accept_redirects: 0
+  net.ipv4.conf.all.send_redirects: 0
+  net.ipv6.conf.all.accept_redirects: 0
+  kernel.randomize_va_space: 2
+  fs.suid_dumpable: 0
+
+# Firewall ports to allow
+stig_allowed_ports:
+  - "22/tcp"
+  - "443/tcp"

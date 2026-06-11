@@ -1,0 +1,23 @@
+---
+galaxy_info:
+  role_name: stig_dgx
+  namespace: stevefulme1
+  author: Steve Fulmer
+  description: DISA STIG hardening for DGX nodes
+  company: Red Hat
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.16"
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+    - name: Ubuntu
+      versions:
+        - jammy
+  galaxy_tags:
+    - security
+    - stig
+    - hardening
+    - dgx
+    - compliance
+dependencies: []

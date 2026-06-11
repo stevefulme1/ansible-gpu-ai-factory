@@ -1,0 +1,38 @@
+---
+# HashiCorp Vault address
+vault_addr: "https://vault.example.com:8200"
+
+# Vault secrets engine path
+vault_engine_path: secret
+
+# Vault secrets engine type
+vault_engine_type: kv-v2
+
+# Vault policies to create
+vault_policies:
+  - name: ai-factory-ngc
+    rules: |
+      path "secret/data/ai-factory/ngc/*" {
+        capabilities = ["create", "read", "update", "delete", "list"]
+      }
+  - name: ai-factory-model-registry
+    rules: |
+      path "secret/data/ai-factory/models/*" {
+        capabilities = ["create", "read", "update", "delete", "list"]
+      }
+  - name: ai-factory-inference
+    rules: |
+      path "secret/data/ai-factory/inference/*" {
+        capabilities = ["read", "list"]
+      }
+
+# AppRole auth settings
+vault_approle_enabled: true
+vault_approle_role_name: ai-factory
+vault_approle_token_ttl: 1h
+vault_approle_token_max_ttl: 4h
+
+# Audit logging
+vault_audit_enabled: true
+vault_audit_path: file
+vault_audit_file_path: /var/log/vault/audit.log

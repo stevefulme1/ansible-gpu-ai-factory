@@ -1,0 +1,6 @@
+---
+infiniband_rdma_validate_certs: true
+infiniband_rdma_speed: ndr
+infiniband_rdma_mtu: 4096
+infiniband_rdma_type: infiniband
+infiniband_rdma_nccl_socket_ifname: eth0

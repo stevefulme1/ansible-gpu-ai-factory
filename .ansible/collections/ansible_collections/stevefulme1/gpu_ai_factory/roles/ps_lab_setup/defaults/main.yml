@@ -1,0 +1,27 @@
+---
+# Lab namespace
+lab_namespace: ai-factory-demo
+
+# Demo models to deploy
+demo_models:
+  - name: llama-7b
+    framework: nemo
+    replicas: 1
+  - name: stable-diffusion
+    framework: triton
+    replicas: 1
+
+# Monitoring
+monitoring_enabled: true
+monitoring_namespace: monitoring
+
+# Demo users
+demo_users:
+  - username: demo-admin
+    role: admin
+  - username: demo-user
+    role: viewer
+
+# Sample notebooks
+notebooks_enabled: true
+notebooks_image: "nvcr.io/nvidia/pytorch:24.05-py3"

@@ -1,0 +1,116 @@
+---
+# extensions/audit/event_query.yml
+# Maps module return values to the AAP Normalized Resource Taxonomy
+# for indirect node counting.
+#
+# GPU AI Factory modules manage bare-metal GPU nodes (DGX, AMD, BCM)
+# and inference serving endpoints (Triton, NeMo).  Return dicts come
+# from the NVIDIA BCM API via to_dict().
+
+stevefulme1.gpu_ai_factory.bcm_node:
+  query: >-
+    {
+      name: .node.hostname,
+      canonical_facts: {
+        uuid: .node.id
+      },
+      facts: {
+        device_type: "bare_metal"
+      }
+    }
+
+stevefulme1.gpu_ai_factory.bcm_gpu_allocation:
+  query: >-
+    {
+      name: .gpu_allocation.name,
+      canonical_facts: {
+        uuid: .gpu_allocation.id
+      },
+      facts: {
+        device_type: "bare_metal"
+      }
+    }
+
+stevefulme1.gpu_ai_factory.dgx_health:
+  query: >-
+    {
+      name: .health[0].hostname,
+      canonical_facts: {
+        uuid: .health[0].id
+      },
+      facts: {
+        device_type: "bare_metal"
+      }
+    }
+
+stevefulme1.gpu_ai_factory.dgx_firmware:
+  query: >-
+    {
+      name: .firmware_update.hostname,
+      canonical_facts: {
+        uuid: .firmware_update.node_id
+      },
+      facts: {
+        device_type: "bare_metal"
+      }
+    }
+
+stevefulme1.gpu_ai_factory.dgx_power:
+  query: >-
+    {
+      name: .power.hostname,
+      canonical_facts: {
+        uuid: .power.node_id
+      },
+      facts: {
+        device_type: "bare_metal"
+      }
+    }
+
+stevefulme1.gpu_ai_factory.dgx_bios:
+  query: >-
+    {
+      name: .bios.hostname,
+      canonical_facts: {
+        uuid: .bios.node_id
+      },
+      facts: {
+        device_type: "bare_metal"
+      }
+    }
+
+stevefulme1.gpu_ai_factory.triton_server:
+  query: >-
+    {
+      name: .triton_server.name,
+      canonical_facts: {
+        uuid: .triton_server.id
+      },
+      facts: {
+        device_type: "api_endpoint"
+      }
+    }
+
+stevefulme1.gpu_ai_factory.triton_model:
+  query: >-
+    {
+      name: .triton_model.name,
+      canonical_facts: {
+        uuid: .triton_model.id
+      },
+      facts: {
+        device_type: "api_endpoint"
+      }
+    }
+
+stevefulme1.gpu_ai_factory.nemo_model:
+  query: >-
+    {
+      name: .model.name,
+      canonical_facts: {
+        uuid: .model.id
+      },
+      facts: {
+        device_type: "api_endpoint"
+      }
+    }

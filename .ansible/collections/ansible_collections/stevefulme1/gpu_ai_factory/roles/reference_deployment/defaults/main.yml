@@ -1,0 +1,23 @@
+---
+# Cluster sizing
+cluster_size: 4
+
+# GPU type for the deployment
+gpu_type: nvidia_a100
+
+# Network type
+network_type: infiniband
+
+# Storage backend
+storage_backend: ceph
+
+# Model serving stack
+model_serving_enabled: true
+model_serving_framework: triton
+
+# Observability stack
+observability_enabled: true
+observability_stack: prometheus
+
+# Deployment namespace
+deployment_namespace: ai-factory

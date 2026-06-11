@@ -1,0 +1,152 @@
+---
+# DISA STIG hardening for DGX nodes
+
+- name: Gather package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Disable unused services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: false
+    masked: true
+  loop: "{{ stig_disabled_services }}"
+  when:
+    - remediate | bool
+    - not (audit_only | bool)
+  failed_when: false
+
+- name: Configure auditd max log file size
+  ansible.builtin.lineinfile:
+    path: /etc/audit/auditd.conf
+    regexp: '^max_log_file\s*='
+    line: "max_log_file = {{ stig_auditd_max_log_file }}"
+    state: present
+  when:
+    - remediate | bool
+    - not (audit_only | bool)
+  notify: Restart auditd
+
+- name: Configure auditd space left action
+  ansible.builtin.lineinfile:
+    path: /etc/audit/auditd.conf
+    regexp: '^space_left_action\s*='
+    line: "space_left_action = {{ stig_auditd_space_left_action }}"
+    state: present
+  when:
+    - remediate | bool
+    - not (audit_only | bool)
+  notify: Restart auditd
+
+- name: Configure auditd mail account
+  ansible.builtin.lineinfile:
+    path: /etc/audit/auditd.conf
+    regexp: '^action_mail_acct\s*='
+    line: "action_mail_acct = {{ stig_auditd_action_mail_acct }}"
+    state: present
+  when:
+    - remediate | bool
+    - not (audit_only | bool)
+  notify: Restart auditd
+
+- name: Ensure auditd is enabled and running
+  ansible.builtin.systemd:
+    name: auditd
+    state: started
+    enabled: true
+  when:
+    - remediate | bool
+    - not (audit_only | bool)
+
+- name: Set SSH hardening - PermitRootLogin
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin'
+    line: "PermitRootLogin {{ stig_ssh_permit_root_login }}"
+    state: present
+    validate: '/usr/sbin/sshd -t -f %s'
+  when:
+    - remediate | bool
+    - not (audit_only | bool)
+  notify: Restart sshd
+
+- name: Set SSH hardening - MaxAuthTries
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?MaxAuthTries'
+    line: "MaxAuthTries {{ stig_ssh_max_auth_tries }}"
+    state: present
+    validate: '/usr/sbin/sshd -t -f %s'
+  when:
+    - remediate | bool
+    - not (audit_only | bool)
+  notify: Restart sshd
+
+- name: Set SSH hardening - ClientAliveInterval
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?ClientAliveInterval'
+    line: "ClientAliveInterval {{ stig_ssh_client_alive_interval }}"
+    state: present
+    validate: '/usr/sbin/sshd -t -f %s'
+  when:
+    - remediate | bool
+    - not (audit_only | bool)
+  notify: Restart sshd
+
+- name: Set SSH hardening - ClientAliveCountMax
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?ClientAliveCountMax'
+    line: "ClientAliveCountMax {{ stig_ssh_client_alive_count_max }}"
+    state: present
+    validate: '/usr/sbin/sshd -t -f %s'
+  when:
+    - remediate | bool
+    - not (audit_only | bool)
+  notify: Restart sshd
+
+- name: Set filesystem permissions on sensitive files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: "{{ item.mode }}"
+    owner: root
+    group: root
+  loop:
+    - {path: /etc/passwd, mode: '0644'}
+    - {path: /etc/shadow, mode: '0000'}
+    - {path: /etc/group, mode: '0644'}
+    - {path: /etc/gshadow, mode: '0000'}
+    - {path: /etc/ssh/sshd_config, mode: '0600'}
+  when:
+    - remediate | bool
+    - not (audit_only | bool)
+
+- name: Set kernel security parameters
+  ansible.builtin.command:
+    cmd: "sysctl -w {{ item.key }}={{ item.value }}"
+  changed_when: true
+  loop: "{{ stig_kernel_params | dict2items }}"
+  when:
+    - remediate | bool
+    - not (audit_only | bool)
+
+- name: Configure firewall - allow required ports
+  ansible.builtin.command:
+    cmd: "firewall-cmd --permanent --add-port={{ item }}"
+  loop: "{{ stig_allowed_ports }}"
+  when:
+    - remediate | bool
+    - not (audit_only | bool)
+  changed_when: true
+  notify: Reload firewall
+
+- name: Configure firewall - set default zone to drop
+  ansible.builtin.command:
+    cmd: firewall-cmd --set-default-zone=drop
+  when:
+    - remediate | bool
+    - not (audit_only | bool)
+    - stig_profile == 'high'
+  changed_when: true

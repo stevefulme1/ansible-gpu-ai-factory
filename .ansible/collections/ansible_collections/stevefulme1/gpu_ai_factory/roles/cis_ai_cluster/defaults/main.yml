@@ -1,0 +1,26 @@
+---
+# CIS benchmark level: 1 or 2
+cis_level: 1
+
+# Whether to apply remediation or just audit
+remediate: true
+
+# Password policy
+cis_password_max_days: 365
+cis_password_min_days: 7
+cis_password_min_length: 14
+cis_password_warn_age: 7
+
+# Account lockout
+cis_account_lockout_attempts: 5
+cis_account_lockout_time: 900
+
+# Logging
+cis_log_retention_days: 90
+
+# Network hardening
+cis_disable_ipv6: false
+cis_disable_wireless: true
+
+# File integrity
+cis_aide_cron_schedule: "0 5 * * *"

@@ -1,0 +1,50 @@
+---
+- name: InfiniBand Fabric Monitoring
+  hosts: all
+  sources:
+    - stevefulme1.gpu_ai_factory.infiniband_fabric:
+        bcm_url: "{{ bcm_url }}"
+        bcm_token: "{{ bcm_token }}"
+        interval: 30
+        link_flap_threshold: 3
+        error_threshold: 100
+        congestion_threshold: 80
+
+  rules:
+    - name: InfiniBand link flap detected
+      condition: >-
+        event.infiniband_fabric.event_type == "link_flap"
+      action:
+        run_playbook:
+          name: stevefulme1.gpu_ai_factory.ib_link_flap_response
+          extra_vars:
+            port_id: "{{ event.infiniband_fabric.port_id }}"
+            flap_count: "{{ event.infiniband_fabric.count }}"
+
+    - name: InfiniBand error threshold exceeded
+      condition: >-
+        event.infiniband_fabric.event_type == "error_threshold"
+      action:
+        run_playbook:
+          name: stevefulme1.gpu_ai_factory.ib_error_response
+          extra_vars:
+            port_id: "{{ event.infiniband_fabric.port_id }}"
+            error_count: "{{ event.infiniband_fabric.error_count }}"
+
+    - name: InfiniBand congestion detected
+      condition: >-
+        event.infiniband_fabric.event_type == "congestion"
+      action:
+        run_playbook:
+          name: stevefulme1.gpu_ai_factory.ib_congestion_response
+          extra_vars:
+            port_id: "{{ event.infiniband_fabric.port_id }}"
+            utilization: "{{ event.infiniband_fabric.utilization_percent }}"
+
+    - name: InfiniBand monitoring error
+      condition: >-
+        event.infiniband_fabric.event_type == "error"
+      action:
+        debug:
+          msg: >-
+            InfiniBand monitoring error: {{ event.infiniband_fabric.error }}

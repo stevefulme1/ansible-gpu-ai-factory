@@ -1,0 +1,10 @@
+---
+nemo_deploy_validate_certs: true
+nemo_deploy_gpu_count: 1
+nemo_deploy_replica_count: 1
+nemo_deploy_max_batch_size: 32
+nemo_deploy_tensor_parallel: 1
+nemo_deploy_pipeline_parallel: 1
+nemo_deploy_triton_http_port: 8000
+nemo_deploy_triton_grpc_port: 8001
+nemo_deploy_triton_metrics_port: 8002

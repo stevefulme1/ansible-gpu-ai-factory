@@ -1,0 +1,4 @@
+---
+virtual_media_boot_validate_certs: true
+virtual_media_boot_wait_timeout: 3600
+virtual_media_boot_reset_after_mount: true

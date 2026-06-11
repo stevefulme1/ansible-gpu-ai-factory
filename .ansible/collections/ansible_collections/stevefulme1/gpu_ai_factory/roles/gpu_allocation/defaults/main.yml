@@ -1,0 +1,6 @@
+---
+gpu_allocation_gpu_count: 1
+gpu_allocation_gpu_type: h100
+gpu_allocation_priority: normal
+gpu_allocation_validate_certs: true
+# gpu_allocation_mig_profile:

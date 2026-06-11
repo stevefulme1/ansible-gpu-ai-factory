@@ -1,0 +1,102 @@
+---
+# Configure HashiCorp Vault for AI Factory
+
+- name: Check Vault seal status
+  ansible.builtin.uri:
+    url: "{{ vault_addr }}/v1/sys/seal-status"
+    method: GET
+    validate_certs: true
+    status_code: [200]
+  register: vault_status
+
+- name: Fail if Vault is sealed
+  ansible.builtin.fail:
+    msg: "Vault is sealed. Please unseal Vault before running this role."
+  when: vault_status.json.sealed | default(true)
+
+# Enable KV secrets engine
+- name: Enable KV secrets engine
+  ansible.builtin.uri:
+    url: "{{ vault_addr }}/v1/sys/mounts/{{ vault_engine_path }}"
+    method: POST
+    headers:
+      X-Vault-Token: "{{ vault_token }}"
+    body_format: json
+    body:
+      type: "{{ vault_engine_type }}"
+      description: "AI Factory secrets engine"
+    status_code: [200, 204]
+    validate_certs: true
+  failed_when: false
+  register: engine_result
+
+# Create policies
+- name: Create Vault policies
+  ansible.builtin.uri:
+    url: "{{ vault_addr }}/v1/sys/policies/acl/{{ item.name }}"
+    method: PUT
+    headers:
+      X-Vault-Token: "{{ vault_token }}"
+    body_format: json
+    body:
+      policy: "{{ item.rules }}"
+    status_code: [200, 204]
+    validate_certs: true
+  loop: "{{ vault_policies }}"
+
+# Set up AppRole auth
+- name: Enable AppRole auth method
+  ansible.builtin.uri:
+    url: "{{ vault_addr }}/v1/sys/auth/approle"
+    method: POST
+    headers:
+      X-Vault-Token: "{{ vault_token }}"
+    body_format: json
+    body:
+      type: approle
+      description: "AI Factory AppRole authentication"
+    status_code: [200, 204]
+    validate_certs: true
+  when: vault_approle_enabled | bool
+  failed_when: false
+
+- name: Create AppRole role
+  ansible.builtin.uri:
+    url: "{{ vault_addr }}/v1/auth/approle/role/{{ vault_approle_role_name }}"
+    method: POST
+    headers:
+      X-Vault-Token: "{{ vault_token }}"
+    body_format: json
+    body:
+      token_ttl: "{{ vault_approle_token_ttl }}"
+      token_max_ttl: "{{ vault_approle_token_max_ttl }}"
+      token_policies: "{{ vault_policies | map(attribute='name') | list }}"
+    status_code: [200, 204]
+    validate_certs: true
+  when: vault_approle_enabled | bool
+
+# Configure audit logging
+- name: Ensure audit log directory exists
+  ansible.builtin.file:
+    path: "{{ vault_audit_file_path | dirname }}"
+    state: directory
+    mode: "0750"
+    owner: vault
+    group: vault
+  when: vault_audit_enabled | bool
+
+- name: Enable audit logging
+  ansible.builtin.uri:
+    url: "{{ vault_addr }}/v1/sys/audit/{{ vault_audit_path }}"
+    method: PUT
+    headers:
+      X-Vault-Token: "{{ vault_token }}"
+    body_format: json
+    body:
+      type: file
+      options:
+        file_path: "{{ vault_audit_file_path }}"
+    status_code: [200, 204]
+    validate_certs: true
+  when: vault_audit_enabled | bool
+  failed_when: false

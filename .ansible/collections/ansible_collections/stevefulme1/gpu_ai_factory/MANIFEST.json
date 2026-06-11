@@ -1,0 +1,51 @@
+{
+ "collection_info": {
+  "namespace": "stevefulme1",
+  "name": "gpu_ai_factory",
+  "version": "1.1.1",
+  "authors": [
+   "Steve Fulmer <sfulmer@redhat.com>"
+  ],
+  "readme": "README.md",
+  "tags": [
+   "infrastructure",
+   "cloud",
+   "networking",
+   "monitoring",
+   "nvidia",
+   "dgx",
+   "gpu",
+   "ai",
+   "bcm",
+   "infiniband",
+   "nemo",
+   "triton",
+   "sovereignai",
+   "amd",
+   "intel",
+   "gaudi",
+   "rocm",
+   "compliance",
+   "stig",
+   "vault"
+  ],
+  "description": "Ansible Collection for multi-vendor GPU AI Factory automation. Provides modules for NVIDIA Base Command Manager (BCM) cluster management, DGX/HGX node provisioning, GPU allocation, tenant isolation, InfiniBand/RDMA networking, NeMo model deployment, Triton Inference Server, NGC catalog management, AMD MI300X GPU management via ROCm SMI, Intel Gaudi accelerator management via Habana Labs API, DISA STIG and CIS benchmark security compliance, HashiCorp Vault credential integration, AAP subscription sizing, and Professional Services deployment bundles. Includes EDA event source plugins for DGX telemetry, InfiniBand fabric monitoring, and NGC catalog watches.",
+  "license": [
+   "GPL-3.0-or-later"
+  ],
+  "license_file": null,
+  "dependencies": {},
+  "repository": "https://github.com/stevefulme1/ansible-gpu-ai-factory",
+  "documentation": "https://github.com/stevefulme1/ansible-gpu-ai-factory/blob/main/README.md",
+  "homepage": "https://github.com/stevefulme1/ansible-gpu-ai-factory",
+  "issues": "https://github.com/stevefulme1/ansible-gpu-ai-factory/issues"
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "42102b5ceecaa5f147a548420a2acadebfa29a9d55ccd49f49e00901fa57a601",
+  "format": 1
+ },
+ "format": 1
+}

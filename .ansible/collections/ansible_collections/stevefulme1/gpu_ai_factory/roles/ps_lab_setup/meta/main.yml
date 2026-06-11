@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  role_name: ps_lab_setup
+  namespace: stevefulme1
+  author: Steve Fulmer
+  description: Stand up a standard AI Factory PS demo environment
+  company: Red Hat
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.16"
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+    - name: Ubuntu
+      versions:
+        - jammy
+  galaxy_tags:
+    - demo
+    - lab
+    - ai
+    - professionalservices
+dependencies: []

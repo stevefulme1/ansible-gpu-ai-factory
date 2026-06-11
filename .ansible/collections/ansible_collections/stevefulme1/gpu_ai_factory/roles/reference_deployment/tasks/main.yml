@@ -1,0 +1,143 @@
+---
+# Deploy AI Factory reference architecture
+
+- name: Create deployment namespace
+  ansible.builtin.command:
+    cmd: "kubectl create namespace {{ deployment_namespace }}"
+  register: ns_result
+  changed_when: ns_result.rc == 0
+  failed_when:
+    - ns_result.rc != 0
+    - '"already exists" not in ns_result.stderr'
+
+# Provision compute nodes
+- name: Label compute nodes for GPU workloads
+  ansible.builtin.command:
+    cmd: >-
+      kubectl label node {{ item }}
+      gpu-type={{ gpu_type }} node-role=gpu-worker --overwrite
+  loop: "{{ groups.get('gpu_workers', []) }}"
+  changed_when: true
+
+- name: Apply GPU node taints
+  ansible.builtin.command:
+    cmd: >-
+      kubectl taint node {{ item }}
+      gpu-workload=true:NoSchedule --overwrite
+  loop: "{{ groups.get('gpu_workers', []) }}"
+  changed_when: true
+
+# Configure GPU fabric
+- name: Deploy NVIDIA GPU operator
+  ansible.builtin.command:
+    cmd: >-
+      kubectl apply -n {{ deployment_namespace }} -f -
+    stdin: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: gpu-fabric-config
+        namespace: {{ deployment_namespace }}
+      data:
+        gpu_type: "{{ gpu_type }}"
+        network_type: "{{ network_type }}"
+        cluster_size: "{{ cluster_size }}"
+  changed_when: true
+
+# Deploy model serving stack
+- name: Deploy model serving infrastructure
+  ansible.builtin.command:
+    cmd: >-
+      kubectl apply -n {{ deployment_namespace }} -f -
+    stdin: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: model-serving
+        namespace: {{ deployment_namespace }}
+      spec:
+        replicas: {{ cluster_size }}
+        selector:
+          matchLabels:
+            app: model-serving
+        template:
+          metadata:
+            labels:
+              app: model-serving
+          spec:
+            containers:
+            - name: {{ model_serving_framework }}
+              image: nvcr.io/nvidia/tritonserver:24.05-py3
+              ports:
+              - containerPort: 8000
+              - containerPort: 8001
+              - containerPort: 8002
+              resources:
+                limits:
+                  nvidia.com/gpu: 1
+  when: model_serving_enabled | bool
+  changed_when: true
+
+# Set up observability
+- name: Deploy observability stack
+  ansible.builtin.command:
+    cmd: >-
+      kubectl apply -n {{ deployment_namespace }} -f -
+    stdin: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: observability-config
+        namespace: {{ deployment_namespace }}
+      data:
+        stack: "{{ observability_stack }}"
+        gpu_metrics_enabled: "true"
+        dcgm_exporter_enabled: "true"
+  when: observability_enabled | bool
+  changed_when: true
+
+# Configure networking
+- name: Configure network policies
+  ansible.builtin.command:
+    cmd: >-
+      kubectl apply -n {{ deployment_namespace }} -f -
+    stdin: |
+      apiVersion: networking.k8s.io/v1
+      kind: NetworkPolicy
+      metadata:
+        name: gpu-fabric-policy
+        namespace: {{ deployment_namespace }}
+      spec:
+        podSelector:
+          matchLabels:
+            app: model-serving
+        policyTypes:
+        - Ingress
+        - Egress
+        ingress:
+        - from:
+          - namespaceSelector:
+              matchLabels:
+                purpose: inference
+        egress:
+        - to:
+          - namespaceSelector:
+              matchLabels:
+                purpose: storage
+  changed_when: true
+
+# Configure storage backend
+- name: Deploy storage configuration
+  ansible.builtin.command:
+    cmd: >-
+      kubectl apply -n {{ deployment_namespace }} -f -
+    stdin: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: storage-config
+        namespace: {{ deployment_namespace }}
+      data:
+        backend: "{{ storage_backend }}"
+        model_cache_size: "100Gi"
+  changed_when: true

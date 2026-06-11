@@ -1,0 +1,23 @@
+---
+galaxy_info:
+  role_name: cis_ai_cluster
+  namespace: stevefulme1
+  author: Steve Fulmer
+  description: CIS benchmark hardening for AI clusters
+  company: Red Hat
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.16"
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+    - name: Ubuntu
+      versions:
+        - jammy
+  galaxy_tags:
+    - security
+    - cis
+    - hardening
+    - compliance
+    - ai
+dependencies: []

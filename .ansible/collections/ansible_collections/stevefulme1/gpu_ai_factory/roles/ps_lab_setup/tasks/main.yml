@@ -1,0 +1,126 @@
+---
+# Stand up a standard AI Factory PS demo environment
+
+- name: Create demo namespace
+  ansible.builtin.command:
+    cmd: "kubectl create namespace {{ lab_namespace }}"
+  register: ns_result
+  changed_when: ns_result.rc == 0
+  failed_when:
+    - ns_result.rc != 0
+    - '"already exists" not in ns_result.stderr'
+
+- name: Label demo namespace
+  ansible.builtin.command:
+    cmd: >-
+      kubectl label namespace {{ lab_namespace }}
+      purpose=demo environment=lab --overwrite
+  changed_when: true
+
+# Deploy sample models
+- name: Deploy demo models
+  ansible.builtin.command:
+    cmd: >-
+      kubectl apply -n {{ lab_namespace }} -f -
+    stdin: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: {{ item.name }}
+        namespace: {{ lab_namespace }}
+      spec:
+        replicas: {{ item.replicas }}
+        selector:
+          matchLabels:
+            app: {{ item.name }}
+        template:
+          metadata:
+            labels:
+              app: {{ item.name }}
+          spec:
+            containers:
+            - name: {{ item.name }}
+              image: placeholder:latest
+              resources:
+                limits:
+                  nvidia.com/gpu: 1
+  loop: "{{ demo_models }}"
+  changed_when: true
+
+# Configure monitoring
+- name: Create monitoring namespace
+  ansible.builtin.command:
+    cmd: "kubectl create namespace {{ monitoring_namespace }}"
+  register: mon_ns_result
+  changed_when: mon_ns_result.rc == 0
+  failed_when:
+    - mon_ns_result.rc != 0
+    - '"already exists" not in mon_ns_result.stderr'
+  when: monitoring_enabled | bool
+
+- name: Deploy GPU monitoring stack
+  ansible.builtin.command:
+    cmd: >-
+      kubectl apply -n {{ monitoring_namespace }} -f -
+    stdin: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: gpu-monitoring-config
+        namespace: {{ monitoring_namespace }}
+      data:
+        prometheus.yml: |
+          scrape_configs:
+            - job_name: dcgm-exporter
+              static_configs:
+                - targets: ['dcgm-exporter:9400']
+  when: monitoring_enabled | bool
+  changed_when: true
+
+# Set up demo users
+- name: Create demo user accounts
+  ansible.builtin.command:
+    cmd: >-
+      kubectl apply -n {{ lab_namespace }} -f -
+    stdin: |
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: {{ item.username }}
+        namespace: {{ lab_namespace }}
+        labels:
+          role: {{ item.role }}
+  loop: "{{ demo_users }}"
+  changed_when: true
+
+# Install sample notebooks
+- name: Deploy sample Jupyter notebooks
+  ansible.builtin.command:
+    cmd: >-
+      kubectl apply -n {{ lab_namespace }} -f -
+    stdin: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: jupyter-lab
+        namespace: {{ lab_namespace }}
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: jupyter-lab
+        template:
+          metadata:
+            labels:
+              app: jupyter-lab
+          spec:
+            containers:
+            - name: jupyter
+              image: {{ notebooks_image }}
+              ports:
+              - containerPort: 8888
+              resources:
+                limits:
+                  nvidia.com/gpu: 1
+  when: notebooks_enabled | bool
+  changed_when: true

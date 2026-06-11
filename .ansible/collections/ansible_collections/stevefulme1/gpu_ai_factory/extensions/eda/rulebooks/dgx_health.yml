@@ -1,0 +1,68 @@
+---
+- name: DGX Health Monitoring
+  hosts: all
+  sources:
+    - stevefulme1.gpu_ai_factory.dgx_telemetry:
+        hosts: "{{ dgx_bmc_hosts }}"
+        username: "{{ redfish_username }}"
+        password: "{{ redfish_password }}"
+        interval: 30
+        metrics:
+          - temperature
+          - gpu_errors
+          - ecc_errors
+          - power
+
+  rules:
+    - name: GPU thermal throttling detected
+      condition: >-
+        event.dgx_telemetry.temperatures is defined and
+        event.dgx_telemetry.temperatures | selectattr('reading_celsius', '>', 85) | list | length > 0
+      action:
+        run_playbook:
+          name: stevefulme1.gpu_ai_factory.dgx_thermal_response
+          extra_vars:
+            affected_host: "{{ event.dgx_telemetry.host }}"
+            temperatures: "{{ event.dgx_telemetry.temperatures }}"
+
+    - name: ECC error threshold exceeded
+      condition: >-
+        event.dgx_telemetry.ecc_errors is defined and
+        event.dgx_telemetry.ecc_errors.uncorrectable | default(0) > 0
+      action:
+        run_playbook:
+          name: stevefulme1.gpu_ai_factory.dgx_ecc_response
+          extra_vars:
+            affected_host: "{{ event.dgx_telemetry.host }}"
+            ecc_errors: "{{ event.dgx_telemetry.ecc_errors }}"
+
+    - name: GPU hardware error detected
+      condition: >-
+        event.dgx_telemetry.gpu_errors is defined and
+        event.dgx_telemetry.gpu_errors | length > 0
+      action:
+        run_playbook:
+          name: stevefulme1.gpu_ai_factory.dgx_gpu_error_response
+          extra_vars:
+            affected_host: "{{ event.dgx_telemetry.host }}"
+            gpu_errors: "{{ event.dgx_telemetry.gpu_errors }}"
+
+    - name: Power consumption critical
+      condition: >-
+        event.dgx_telemetry.power is defined and
+        event.dgx_telemetry.power.power_consumed_watts | default(0) >
+        event.dgx_telemetry.power.power_limit_watts | default(99999) * 0.95
+      action:
+        run_playbook:
+          name: stevefulme1.gpu_ai_factory.dgx_power_response
+          extra_vars:
+            affected_host: "{{ event.dgx_telemetry.host }}"
+            power: "{{ event.dgx_telemetry.power }}"
+
+    - name: DGX telemetry collection error
+      condition: event.dgx_telemetry.error is defined
+      action:
+        debug:
+          msg: >-
+            Failed to collect telemetry from {{ event.dgx_telemetry.host }}:
+            {{ event.dgx_telemetry.error }}
