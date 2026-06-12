@@ -28,7 +28,7 @@ options:
             - Specific NGC image ID to query.
         type: str
 extends_documentation_fragment:
-    - stevefulme1.gpu_ai_factory.nvidia
+    - stevefulme1.gpu_ai_factory.bcm
 requirements:
     - "python >= 3.12"
     - "requests"
