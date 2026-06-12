@@ -33,6 +33,16 @@ options:
         type: str
 extends_documentation_fragment:
     - stevefulme1.gpu_ai_factory.bcm
+    wait:
+        description:
+            - Whether to wait for the resource to reach a stable state before returning.
+        type: bool
+        default: true
+    wait_timeout:
+        description:
+            - Maximum time in seconds to wait for the resource to reach a stable state.
+        type: int
+        default: 600
 requirements:
     - "python >= 3.12"
     - "requests"
