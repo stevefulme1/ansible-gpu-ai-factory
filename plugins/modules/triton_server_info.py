@@ -111,7 +111,7 @@ from ansible_collections.stevefulme1.gpu_ai_factory.plugins.module_utils.nvidia_
     NVIDIA_COMMON_ARGS,
     to_dict,
 )
-from ansible_collections.stevefulme1.gpu_ai_factory.plugins.module_utils.nvidia_auth import create_bcm_client
+from ansible_collections.stevefulme1.gpu_ai_factory.plugins.module_utils.bcm_client import BcmClient
 from ansible_collections.stevefulme1.gpu_ai_factory.plugins.module_utils.nvidia_wait import call_with_retry
 
 
