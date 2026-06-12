@@ -19,6 +19,8 @@ author:
 extends_documentation_fragment:
     - stevefulme1.gpu_ai_factory.bcm
 options:
+    bcm_url:
+        required: true
     name:
         description:
             - Name for the job.

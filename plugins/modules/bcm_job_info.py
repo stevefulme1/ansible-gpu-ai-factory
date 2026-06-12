@@ -20,6 +20,8 @@ author:
 extends_documentation_fragment:
     - stevefulme1.gpu_ai_factory.bcm
 options:
+    bcm_url:
+        required: true
     job_id:
         description:
             - ID of a specific job to retrieve.
