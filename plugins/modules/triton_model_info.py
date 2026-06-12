@@ -163,8 +163,14 @@ def main():
     if not HAS_REQUESTS:
         module.fail_json(msg="The 'requests' Python library is required.")
 
-    client = create_bcm_client(module)
     params = module.params
+    client = BcmClient(
+        base_url=params["bcm_url"],
+        username=params.get("bcm_username"),
+        password=params.get("bcm_password"),
+        token=params.get("bcm_token"),
+        validate_certs=params["validate_certs"],
+    )
     base_url = client.base_url
 
     if params.get("model_id"):
