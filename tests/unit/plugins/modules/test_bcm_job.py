@@ -20,8 +20,13 @@ class TestCreate:
     def test_create(self, mock_ansible_cls):
         """Creating bcm_job calls exit_json with changed=True."""
         mock_module = MagicMock()
-        mock_module.params = {'bcm_url': 'https://test.example.com', 'bcm_token': 'test-token', 'validate_certs': False, 'name': 'test-job', 'command': 'echo hello',
-                              'num_gpus': 1, 'num_nodes': 1, 'queue': 'default', 'state': 'submitted', 'job_id': None, 'bcm_username': None, 'bcm_password': None}
+        mock_module.params = {
+            'bcm_url': 'https://test.example.com', 'bcm_token': 'test-token',
+            'validate_certs': False, 'name': 'test-job',
+            'command': 'echo hello', 'num_gpus': 1, 'num_nodes': 1,
+            'queue': 'default', 'state': 'submitted', 'job_id': None,
+            'bcm_username': None, 'bcm_password': None,
+        }
         mock_module.check_mode = False
         mock_ansible_cls.return_value = mock_module
         main()
@@ -37,8 +42,13 @@ class TestDelete:
     def test_delete(self, mock_ansible_cls):
         """Deleting bcm_job calls exit_json with changed=True."""
         mock_module = MagicMock()
-        mock_module.params = {'bcm_url': 'https://test.example.com', 'bcm_token': 'test-token', 'validate_certs': False, 'name': 'test-job',
-                              'job_id': 'test-job-id', 'state': 'cancelled', 'command': None, 'num_gpus': 1, 'num_nodes': 1, 'queue': None, 'bcm_username': None, 'bcm_password': None}
+        mock_module.params = {
+            'bcm_url': 'https://test.example.com', 'bcm_token': 'test-token',
+            'validate_certs': False, 'name': 'test-job',
+            'job_id': 'test-job-id', 'state': 'cancelled',
+            'command': None, 'num_gpus': 1, 'num_nodes': 1,
+            'queue': None, 'bcm_username': None, 'bcm_password': None,
+        }
         mock_module.check_mode = False
         mock_ansible_cls.return_value = mock_module
         main()
