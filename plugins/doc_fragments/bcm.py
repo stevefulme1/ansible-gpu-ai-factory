@@ -16,7 +16,6 @@ options:
             - URL of the BCM CMDaemon REST API.
             - Typically runs on port 8081 of the head node.
         type: str
-        required: true
     bcm_username:
         description:
             - CMDaemon username for authentication.
