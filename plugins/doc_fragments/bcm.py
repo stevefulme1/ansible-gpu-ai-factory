@@ -37,4 +37,14 @@ options:
             - Whether to validate TLS certificates.
         type: bool
         default: true
+    wait:
+        description:
+            - Whether to wait for asynchronous operations to complete.
+        type: bool
+        default: true
+    wait_timeout:
+        description:
+            - Maximum time to wait for operations to complete, in seconds.
+        type: int
+        default: 600
 """
