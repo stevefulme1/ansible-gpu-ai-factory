@@ -37,4 +37,14 @@ options:
             - Whether to validate TLS certificates.
         type: bool
         default: true
+    wait:
+        description:
+            - Whether to wait for the resource to reach a stable state before returning.
+        type: bool
+        default: true
+    wait_timeout:
+        description:
+            - Maximum time in seconds to wait for the resource to reach a stable state.
+        type: int
+        default: 600
 """
